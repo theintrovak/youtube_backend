@@ -117,7 +117,7 @@ console.log("FILES:", req.files);
 const logoutUser = asyncHandler( async (req , res ) =>{
    
 })
-const refreshaccessToken = (req , res) =>{
+const refreshAccessToken = (req , res) =>{
 const  incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 } 
 if(!incomingRefreshToken) throw new apierror(401 , "Refresh token is required") 
@@ -151,6 +151,6 @@ throw new apierror(500 , "something went wrong while refreshing access token"
 export {
     registerUser,
     userLogin,
-    refreshaccessToken,
+    refreshAccessToken,
     logoutUser
 }
