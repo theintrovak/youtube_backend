@@ -35,7 +35,7 @@ const User = await user.findOne({
  if(!User) throw new apierror(404 , "User not found")
  const isPasswordCorrect = await User.ispasswordCorrect(password);
  if(!isPasswordCorrect) throw new apierror(401 , "Password is incorrect")
- const {accessToken , refreshToken} = GenerateAccessAndRefreshToken(User._id);
+ const {accessToken , refreshToken} = await GenerateAccessAndRefreshToken(User._id);
 const loggedInUser = await User.findById(User._id).select("-password -refreshToken");
 if(!loggedInUser) throw new apierror(500 , "something went wrong while logging in the user")
 const options = {
@@ -113,8 +113,44 @@ console.log("FILES:", req.files);
         throw new apierror(500 , "something went wrong while registering the user and images were deleted from cloudinary")
         
     }
+});
+const logoutUser = asyncHandler( async (req , res ) =>{
+   
 })
+const refreshaccessToken = (req , res) =>{
+const  incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+} 
+if(!incomingRefreshToken) throw new apierror(401 , "Refresh token is required") 
+
+try {
+    const decodedToken = jwt.verify(incomingRefreshToken , process.env.REFRESH_TOKEN_SECRET_KEY);
+    const User =await User.findById(decodedToken?.id)
+    if(!User) throw new apierror(404 , "invalid refresh token")
+        if(User.refreshToken !== incomingRefreshToken){
+            throw new apierror(401 , "invalid refresh token");  
+        }
+        const options ={
+            httpOnly : true,
+            secure : process.env.NODE_ENV === "production"
+        }
+    const {accessToken , refreshToken: newRefreshToken} =   await  GenerateAccessAndRefreshToken(User._id);
+        return res
+        .status(200)
+        .cookie("accessToken" , accessToken , options)
+        .cookie("refreshToken" , newRefreshToken , options)
+        .json(new Apiresponse(200  
+            , {accessToken , refreshToken : newRefreshToken}
+                 , "Refresh token is valid"))
+} catch (error) {
+throw new apierror(500 , "something went wrong while refreshing access token"
+)
+}
+
+
+
 export {
     registerUser,
-    userLogin
+    userLogin,
+    refreshaccessToken,
+    logoutUser
 }
